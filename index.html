@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+</head>
+<body>
+
+<!-- 定义AngularJS应用 -->
+<div ng-app="myApp" ng-controller="myCtrl" ng-init="mySwitch = true; hour = 13; myEmail = 'test@runoob.com'">
+    <!-- 绑定模型 -->
+    <p>名字 : <input type="text" ng-model="name"></p>
+    <!-- 表达式输出 -->
+    <h1>{{greeting}}</h1>
+    <button ng-click='sayHello()'>点我</button>
+
+    <button ng-click="count = count + 1">点我+1, {{ count }}</button>
+
+    <button ng-disabled="mySwitch">是否禁用: {{mySwitch}}</button>
+
+    <p ng-show="true">我是可见的。</p>
+    <p ng-hide="true">我是不可见的。</p>
+    <p ng-show="hour > 12">我是可见的, 因为hour is {{hour}}。</p>
+
+    <p>我的第一个表达式： {{ (5 + 5) | myFormat }}</p>
+
+    名: <input type="text" ng-model="firstName"><br>
+    姓: <input type="text" ng-model="lastName"><br>
+    姓名: {{(firstName | reverse) + " " + lastName}}<br>
+
+
+    <input type="number" ng-model="quantity">
+    <input type="number" ng-model="price">
+
+    <p>总价 = {{ (quantity * price) | currency }}</p>
+
+
+
+    <p>使用 ng-repeat 来循环数组</p>
+    <h1>{{lastname}} 家族成员:</h1>
+    <p><input type="text" ng-model="filterStr"></p>
+    <ul>
+        <li ng-repeat="x in names | filter:filterStr | orderBy:'country'">
+            {{ (x.name | uppercase) + ', ' + x.country }} {{lastname}}
+        </li>
+    </ul>
+
+    <table>
+        <tr ng-repeat="x in names">
+            <td>{{ $index + 1 }}</td>
+            <td>{{ x.name }}</td>
+            <td>{{ x.country }}</td>
+        </tr>
+    </table>
+
+    <select ng-init="selectedName = companys[1]" ng-model="selectedName" ng-options="x for x in companys">
+    </select>
+
+    <select ng-model="selectedCry" ng-options="x.name for x in names">
+    </select>
+    <h1>你选择的是: {{selectedCry.name}}, 国家为: {{selectedCry.country}}</h1>
+
+    <select ng-model="selectedCar" ng-options="value.brand for (key, value) in cars">
+    </select>
+    <h1>你选择的是{{selectedCar.model}}</h1>
+
+
+    <form name="myForm" novalidate>
+        <p>用户名:<br>
+            <input type="text" name="user" ng-model="user" required>
+            <span style="color:red" ng-show="myForm.user.$dirty && myForm.user.$invalid">
+                <span ng-show="myForm.user.$error.required">用户名是必须的。</span>
+            </span>
+        </p>
+        <p>邮箱:<br>
+            <input type="email" name="myAddress" ng-model="myEmail" required>
+            <span style="color:red" ng-show="myForm.myAddress.$dirty && myForm.myAddress.$invalid">
+                <span ng-show="myForm.myAddress.$error.required">邮箱是必须的。</span>
+                <span ng-show="myForm.myAddress.$error.email">不是一个合法的邮箱地址。</span>
+            </span>
+        </p>
+        <p>
+            <input type="submit"
+            ng-disabled="myForm.user.$dirty && myForm.user.$invalid ||
+            myForm.myAddress.$dirty && myForm.myAddress.$invalid">
+        </p>
+
+        <h1>状态</h1>        
+        <h2>点击过$touched: {{myForm.myAddress.$touched}}</h2>
+        <h2>修改过$dirty: {{myForm.myAddress.$dirty}}</h2>
+        <h2>未修改过$pristine: {{myForm.myAddress.$pristine}}</h2>
+        <h2>校验正确$valid: {{myForm.myAddress.$valid}}</h2>
+        <h2>校验非法$invalid: {{myForm.myAddress.$invalid}}</h2>
+
+        <h1>错误</h1>
+        <h2>非空$error.required: {{myForm.myAddress.$error.required}}</h2>
+        <h2>email格式$error.email: {{myForm.myAddress.$error.email}}</h2>
+    </form>
+    
+
+    <runoob-directive></runoob-directive>
+
+    <h1>{{myUrl}}</h1>
+    <h1>{{myWelcome}}</h1>
+    <h1>{{theTime}}</h1>
+</div>
+
+<!-- js放在body内底部提升加载速度 -->
+<script src="https://cdn.staticfile.org/angular.js/1.4.6/angular.min.js"></script>
+<script>
+var app = angular.module('myApp', []);
+app.controller('myCtrl', function($scope, $location, $http, $timeout, $interval, hexafy, $rootScope) {
+    $scope.firstName= "John";
+    $scope.lastName= "Doe";
+
+    $scope.name = "Runoob";
+    $scope.sayHello = function() {
+        $scope.greeting = 'Hello ' + $scope.name + '!';
+    };
+
+    $scope.names = [
+        {
+            "name": "Emil",
+            "country": "India"
+        }, {
+            "name": "Tobias",
+            "country": "China"
+        }, {
+            "name": "Linus",
+            "country": "American"
+        }];
+
+    $scope.companys = ["Google", "Runoob", "Taobao"];
+
+    $scope.cars = {
+        car01 : {brand : "Ford", model : "Mustang", color : "red"},
+        car02 : {brand : "Fiat", model : "500", color : "white"},
+        car03 : {brand : "Volvo", model : "XC90", color : "black"}
+    };
+
+    $rootScope.lastname = "Refsnes";
+
+    $scope.myUrl = $location.absUrl() + hexafy.myFunc(255);
+    // $http.get("service.html").then(function (response) {
+    //     $scope.myWelcome = response.data;
+    // });
+    $http({
+        method: 'GET',
+        url: 'service.html'
+    }).then(function successCallback(response) {
+        $scope.myWelcome = response.data.sites;
+    }, function errorCallback(response) {
+        // 请求失败执行代码
+    });
+    // $http.get('https://www.runoob.com/try/angularjs/data/sites.php')
+    // .success(function(data, status, headers, config){
+    // // GET成功时被回调
+    // $scope.myWelcome = "success" + data;
+    // })
+    // .error(function(data, status, headers, config){
+    // // GET失败时被回调
+    // $scope.myWelcome = "error" + data + status;
+    // });
+    $timeout(function () {
+        $scope.myWelcome = "How are you today?";
+    }, 2000);
+    $scope.theTime = new Date().toLocaleTimeString();
+    $interval(function () {
+        $scope.theTime = new Date().toLocaleTimeString();
+    }, 1000);
+});
+app.directive("runoobDirective", function() {
+    return {
+        restrict : "EA",  // 限制调用方式
+        template : "<h1>自定义指令!</h1>"
+    };
+});
+app.filter('reverse', function() {  // 可以注入依赖
+    return function(text) {
+        return text.split("").reverse().join("");
+    }
+});
+app.service('hexafy', function() {
+    this.myFunc = function (x) {
+        return x.toString(16);
+    }
+});
+app.filter('myFormat',['hexafy', function(hexafy) {
+    return function(x) {
+        return hexafy.myFunc(x);
+    };
+}]);
+</script>
+</body>
+</html>
